@@ -15,7 +15,6 @@ private:
     int V;
     int E;
     std::list<DirectedEdge> *adj;
-    int *indegree;
 
     void validateVertex(int v);
 public:
@@ -31,6 +30,7 @@ public:
 
 
 
+
 EdgeWeightedDigraph::EdgeWeightedDigraph(int V) : V(V)
 {
     if (V < 0)
@@ -39,7 +39,7 @@ EdgeWeightedDigraph::EdgeWeightedDigraph(int V) : V(V)
     }
     
     E = 0;
-    indegree = new int[V];
+    
     adj = new std::list<DirectedEdge>[V];
 }
 
@@ -81,7 +81,7 @@ void EdgeWeightedDigraph::addEdge(DirectedEdge* e)
     validateVertex(v);
     validateVertex(w);
     adj[v].push_back(*e);
-    //indegree[w]++;
+
     E++;
 }
 

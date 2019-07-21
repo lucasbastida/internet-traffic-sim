@@ -12,6 +12,7 @@ private:
     double weight;
 
 public:
+    DirectedEdge();
     DirectedEdge(int v, int w, double weight);
     ~DirectedEdge();
     int from() { return v; }
@@ -19,6 +20,10 @@ public:
     double getWeight() { return weight; }
     std::string toString() { return (std::to_string(v) + "->" + std::to_string(w) + " " + std::to_string(weight)); }
 };
+
+DirectedEdge::DirectedEdge() : v(0), w(0), weight(0.0)
+{
+}
 
 DirectedEdge::DirectedEdge(int v, int w, double weight) : v(v), w(w), weight(weight)
 {
