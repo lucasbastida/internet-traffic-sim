@@ -7,9 +7,9 @@
 class DirectedEdge
 {
 private:
-    const int v;
-    const int w;
-    const double weight;
+    int v;
+    int w;
+    double weight;
 
 public:
     DirectedEdge(int v, int w, double weight);
@@ -17,7 +17,7 @@ public:
     int from() { return v; }
     int to() { return w; }
     double getWeight() { return weight; }
-    std::string toString(){ return (v + "->" + std::to_string(w) + " " + std::to_string(weight)); }
+    std::string toString() { return (std::to_string(v) + "->" + std::to_string(w) + " " + std::to_string(weight)); }
 };
 
 DirectedEdge::DirectedEdge(int v, int w, double weight) : v(v), w(w), weight(weight)

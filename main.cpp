@@ -1,31 +1,36 @@
 #include <iostream>
+#include <fstream>
+#include "DirectedEdge.h"
+#include "EdgeWeightedDigraph.h"
 
 using namespace std;
 
-class Router{
-
+class Router
+{
 };
 
-class Terminal{
-
+class Terminal
+{
 };
 
-class Page{
-
+class Page
+{
 };
 
-class Packet{
-
+class Packet
+{
 };
 
-class Admin{
-
+class Admin
+{
 };
 
+int main()
+{
+    ifstream ifs("mediumEWD.txt");
+    EdgeWeightedDigraph graph(ifs);
+    ifs.close();
+    cout<< graph.toString() <<endl;
 
-
-int main(){
-
-    cout << "Hello world!" << endl;
     return 0;
 }
