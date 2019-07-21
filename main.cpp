@@ -35,17 +35,26 @@ int main()
     cout << graph.toString() << endl;
 
     cout << "DijkstraSP:" << endl;
-    Dijkstra spDijkstra(graph, 0);
-    cout << "Has path to X: " << spDijkstra.hasPathTo(6) << endl;
-    if (spDijkstra.hasPathTo(6))
+    Dijkstra sp(graph, 0);
+    for (int t = 0; t < graph.getV(); t++)
     {
-        stack<DirectedEdge> s1 = spDijkstra.pathTo(6);
-        while (!s1.empty())
+        if (sp.hasPathTo(t))
         {
-            cout<< s1.top().toString() << endl;
-            s1.pop();
+            stack<DirectedEdge> s1 = sp.pathTo(t);
+            cout << 0 << " to " << t << " ("<< sp.distTo(t) <<") : ";
+            string path = "";
+            while (!s1.empty())
+            {
+                path.append(s1.top().toString());
+                path.append("  ");
+                s1.pop();
+            }
+            cout << path << endl;
+        }
+        else
+        {
+            cout << 0 << "has no path to " << t << endl;
         }
     }
-
     return 0;
 }
