@@ -8,13 +8,15 @@
 #include <stdexcept>
 #include <istream>
 #include "DirectedEdge.h"
+#include "Router.h"
 
 class EdgeWeightedDigraph
 {
 private:
     int V;
     int E;
-    std::list<DirectedEdge> *adj;
+
+    Router* nodes;
 
     void validateVertex(int v);
 public:
@@ -40,7 +42,7 @@ EdgeWeightedDigraph::EdgeWeightedDigraph(int V) : V(V)
     
     E = 0;
     
-    adj = new std::list<DirectedEdge>[V];
+    nodes = new Router[V];
 }
 
 EdgeWeightedDigraph::EdgeWeightedDigraph(std::istream& ist) : V(0),E(0)
@@ -50,7 +52,9 @@ EdgeWeightedDigraph::EdgeWeightedDigraph(std::istream& ist) : V(0),E(0)
     {
         throw std::invalid_argument("|V| in a Digraph must be nonnegative");
     }
-    adj = new std::list<DirectedEdge>[V];
+
+    nodes = new Router[V];
+
 	for (int i = 0; i < E; i++)
 	{
 		int v, w;
@@ -80,7 +84,8 @@ void EdgeWeightedDigraph::addEdge(DirectedEdge* e)
     int w = e->to();
     validateVertex(v);
     validateVertex(w);
-    adj[v].push_back(*e);
+
+    nodes[v].adj.push_back(*e);
 
     E++;
 }
@@ -88,7 +93,8 @@ void EdgeWeightedDigraph::addEdge(DirectedEdge* e)
 std::list<DirectedEdge> EdgeWeightedDigraph::adjList(int v)
 {
     validateVertex(v);
-    return adj[v];
+
+    return nodes[v].adj;
 }
 
 std::string EdgeWeightedDigraph::toString()
@@ -98,7 +104,7 @@ std::string EdgeWeightedDigraph::toString()
     for (int v = 0; v < V; v++)
     {
         s.append(std::to_string(v) + ": ");
-        for (std::list<DirectedEdge>::iterator it = adj[v].begin(); it != adj[v].end(); ++it)
+        for (std::list<DirectedEdge>::iterator it = nodes[v].adj.begin(); it != nodes[v].adj.end(); ++it)
         {
             s.append(it->toString() + " ");
         }

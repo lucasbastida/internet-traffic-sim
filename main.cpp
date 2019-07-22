@@ -7,10 +7,6 @@
 
 using namespace std;
 
-class Router
-{
-};
-
 class Terminal
 {
 };
@@ -23,13 +19,9 @@ class Packet
 {
 };
 
-class Admin
-{
-};
-
 int main()
 {
-    ifstream ifs("mediumEWD.txt");
+    ifstream ifs("tinyEWD.txt");
     EdgeWeightedDigraph graph(ifs);
     ifs.close();
     cout << graph.toString() << endl;
