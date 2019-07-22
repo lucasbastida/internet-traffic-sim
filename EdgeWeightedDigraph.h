@@ -1,5 +1,3 @@
-//NOTE: *indegree not pointing to object
-
 #ifndef EDGE_WEIGHTED_DIGRAPH_H
 #define EDGE_WEIGHTED_DIGRAPH_H
 
@@ -28,10 +26,9 @@ public:
     void addEdge(DirectedEdge *e);
     std::list<DirectedEdge> adjList(int v);
     std::string toString();
+
+    
 };
-
-
-
 
 EdgeWeightedDigraph::EdgeWeightedDigraph(int V) : V(V)
 {
