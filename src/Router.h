@@ -1,3 +1,4 @@
+//TODO ADD RANDOM PAGE SIZE
 #ifndef ROUTER_H
 #define ROUTER_H
 
@@ -22,6 +23,9 @@ class Router
     std::queue<Packet*> *edgeQueue;
     std::list<std::queue<Packet>> newPage;
 
+    void redirectPacket(Packet* packet);
+    void storePacket(Packet* packet);
+
 public:
     std::list<DirectedEdge> adj;
 public:
@@ -41,7 +45,7 @@ void Router::initialize(int terminalAmount, int V)
 
     for (int i = 0; i < terminalAmount; i++)
     {
-        terminals[i].page = new Page(i, 20); ///TODO ADD RANDOM PAGE SIZE
+        terminals[i].page = new Page(i, 20); //TODO ADD RANDOM PAGE SIZE
     }
     
 }
@@ -69,7 +73,31 @@ void Router::recievePage(Page *page,int destination[])
 
 void Router::recivePacket()
 {
+    for (int i = 0; i < buffer.size(); i++)
+    {
+        Packet* packet = buffer.front();
+
+        if (packet->recieverIp[1] == this->ip)
+        {
+            storePacket(packet);
+        }
+        else
+        {
+            redirectPacket(packet);
+        }
+
+        buffer.pop();
+    }
+    
+}
+
+void Router::storePacket(Packet * packet)
+{
 
 }
 
+void Router::redirectPacket(Packet * packet)
+{
+    
+}
 #endif
