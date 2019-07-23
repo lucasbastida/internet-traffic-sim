@@ -20,12 +20,12 @@ public:
     std::list<DirectedEdge> adj;
 
     void setIp(int ip) { this->ip = ip; };
-    void setRouteTable();
+    void setRouteTable(int v);
 };
 
-void Router::setRouteTable()
+void Router::setRouteTable(int v)
 {
-    routeTable = new std::stack<DirectedEdge>[adj.size()];
+    routeTable = new std::stack<DirectedEdge>[v];
 }
 
 
