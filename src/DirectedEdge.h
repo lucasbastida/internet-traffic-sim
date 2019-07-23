@@ -21,10 +21,10 @@ public:
     int to() { return w; }
     double getWeight() { return weight; }
     std::string toString() { return (std::to_string(v) + "->" + std::to_string(w) + " " + std::to_string(weight)); }
-    void updateWeight(int queue);
+    void updateWeight(int queueSize, int packetSize);
 };
 
-DirectedEdge::DirectedEdge() : v(0), w(0), weight(0.0)
+DirectedEdge::DirectedEdge() : v(0), w(0), weight(1)
 {
 }
 
@@ -36,17 +36,9 @@ DirectedEdge::DirectedEdge(int v, int w, double weight) : v(v), w(w), weight(wei
     }
 }
 
-void DirectedEdge::updateWeight(int queue)
+void DirectedEdge::updateWeight(int queueSize, int packetSize)
 {
-    if (queue == 0)
-    {
-        weight = bandwidth;
-    }
-    
-    else
-    {
-        weight = (queue/bandwidth);
-    }
+    weight = 1 + (int) (queueSize * packetSize / bandwidth);
 }
 
 DirectedEdge::~DirectedEdge()
