@@ -7,10 +7,6 @@
 
 using namespace std;
 
-class Terminal
-{
-};
-
 int main()
 {
     ifstream ifs("tinyEWD.txt");
