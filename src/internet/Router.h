@@ -5,7 +5,7 @@
 #include <list>
 #include <stack>
 #include <queue>
-#include "DirectedEdge.h"
+#include "../graph/DirectedEdge.h"
 #include "Packet.h"
 #include "Terminal.h"
 

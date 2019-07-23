@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <istream>
 #include "DirectedEdge.h"
-#include "Router.h"
+#include "../internet/Router.h"
 
 class EdgeWeightedDigraph
 {

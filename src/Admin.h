@@ -4,10 +4,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "Router.h"
-#include "EdgeWeightedDigraph.h"
-#include "DirectedEdge.h"
-#include "Dijkstra.h"
+#include "./internet/Router.h"
+#include "./graph/EdgeWeightedDigraph.h"
+#include "./graph/DirectedEdge.h"
+#include "./graph/Dijkstra.h"
 
 
 class Admin

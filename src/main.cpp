@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "DirectedEdge.h"
-#include "EdgeWeightedDigraph.h"
-#include "Dijkstra.h"
+#include "./graph/DirectedEdge.h"
+#include "./graph/EdgeWeightedDigraph.h"
+#include "./graph/Dijkstra.h"
 #include <stack>
 
 using namespace std;
