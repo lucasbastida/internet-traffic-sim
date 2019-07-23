@@ -28,9 +28,9 @@ DirectedEdge::DirectedEdge() : v(0), w(0), weight(1)
 {
 }
 
-DirectedEdge::DirectedEdge(int v, int w, double weight) : v(v), w(w), weight(weight), bandwidth(weight)
+DirectedEdge::DirectedEdge(int v, int w, double bandwidth) : v(v), w(w), weight(1), bandwidth(bandwidth)
 {
-    if (v < 0 || w < 0)
+    if (v < 0 || w < 0 || bandwidth < 0 )
     {
         throw std::invalid_argument("received negative value");
     }
