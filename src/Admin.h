@@ -29,7 +29,6 @@ public:
     Admin(std::string dir);
     void updateRouteTable();
     void cycle();
-    void cycleNoPage();
 };
 
 Admin::Admin(std::string dir)
@@ -44,7 +43,7 @@ void Admin::loadFile(std::string dir)
 
     ist >> V;
     ist >> E;
-    ist>>terminalAmount;
+    ist >> terminalAmount;
     if (V < 0)
         throw std::invalid_argument("|V| in a Digraph must be nonnegative");
 
@@ -60,7 +59,6 @@ void Admin::loadFile(std::string dir)
         DirectedEdge *edge = new DirectedEdge(v, w, weight);
         G->addEdge(edge);
     }
-    
     ist.close();
 }
 
@@ -110,25 +108,34 @@ void Admin::updateRouteTable()
 
 void Admin::turnOnRouters()
 {
+
     for (int i = 0; i < V; i++)
     {
-        G->nodes[i].initialize(terminalAmount, G->nodes[i].adj.front().from(), V);
+        G->nodes[i].initialize(terminalAmount, G->nodes[i].adj.front().from(), V, &generator);
     }
     updateRouteTable();
 }
 
 void Admin::cycle()
 {
-    //SEND PAGE
-    std::uniform_int_distribution<int> randomRouter(0,V);
-    std::uniform_int_distribution<int> randomTerminal(0,terminalAmount);
-    std::uniform_int_distribution<int> probability(0,100);
+    //SEND PAGE if probability > 60.
+    std::uniform_int_distribution<int> randomRouter(0, V - 1);
+    std::uniform_int_distribution<int> randomTerminal(0, terminalAmount - 1);
+    std::uniform_int_distribution<int> probability(0, 100);
 
-    for (int i = 0; i < 5; i++)
+    if (probability(generator) > 60)
     {
-        int destination[2] = {6, 0};
-        Page *page = G->nodes[0].terminals[0].page;
-        G->nodes[0].recievePage(page, destination);
+        
+        int origin[2] = {randomRouter(generator), randomTerminal(generator)};
+        int destination[2] = {randomRouter(generator), randomTerminal(generator)};
+
+        if (origin[0] != destination[0])
+        {
+            Page *page = G->nodes[origin[0]].terminals[origin[1]].page;
+            G->nodes[origin[0]].recievePage(page, destination);
+            std::cout << "PROBABILITY OF SENDING PAGE OVER 60%...SENDING PAGE FROM-->TO:  " << 
+            origin[0]<<"."<<origin[1]<<"-->"<<destination[0]<<"."<<destination[1]<<std::endl;
+        }
     }
 
     //SEND ALL PACKETS IN EDGE QUEUE
@@ -146,36 +153,12 @@ void Admin::cycle()
         }
     }
 
-    //WORK ON PACKETS IN BUFFER. STORE OR REDIRECT.
+    //WORK ON PACKETS IN BUFFER. STORE PACKET TO GENERATE WEBPAGE OR REDIRECT TO EDGE QUEUE.
     for (int i = 0; i < V; i++)
     {
         G->nodes[i].recivePacket();
     }
-}
 
-void Admin::cycleNoPage()
-{
-
-    //SEND ALL PACKETS IN EDGE QUEUE
-    for (int i = 0; i < V; i++)
-    {
-        for (int j = 0; j < G->nodes[i].adj.size(); j++)
-        {
-            while (!G->nodes[i].edgeQueue[j].empty())
-            {
-                int destination = G->nodes[i].edgeQueue[j].front()->recieverIp[0];
-                Packet *packet = G->nodes[i].edgeQueue[j].front();
-                G->nodes[destination].buffer.push(packet);
-                G->nodes[i].edgeQueue[j].pop();
-            }
-        }
-    }
-
-    //WORK ON PACKETS IN BUFFER. STORE OR REDIRECT.
-    for (int i = 0; i < V; i++)
-    {
-        G->nodes[i].recivePacket();
-    }
 }
 
 #endif
