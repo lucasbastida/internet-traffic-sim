@@ -5,10 +5,7 @@
 #include <list>
 #include <stack>
 #include <queue>
-
-#include <stdio.h>      /* printf, scanf, puts, NULL */
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>  
+#include <random>
 
 #include "../graph/DirectedEdge.h"
 #include "Packet.h"
@@ -21,7 +18,7 @@ class Router
     int ip;
     int numberTerminals;
     int packetsStored = 0;
-
+    
     std::stack<DirectedEdge> *routeTable;
 
     std::list<std::queue<Packet>> newPage;
@@ -37,7 +34,7 @@ public:
     Terminal *terminals;
 
 public:
-    void initialize(int numberTerminals, int ip, int V);
+    void initialize(int numberTerminals, int ip, int V, std::default_random_engine *generator);
     void updateRouteTable(std::stack<DirectedEdge> *routeTable);
 
     void updateEdgeWeights();
@@ -46,19 +43,21 @@ public:
     std::string toString();
 };
 
-void Router::initialize(int terminalAmount, int ip, int V)
+void Router::initialize(int terminalAmount, int ip, int V, std::default_random_engine *generator)
 {
+    
     this->ip = ip;
     this->numberTerminals = terminalAmount;
-    srand (time(NULL));
 
     terminals = new Terminal[terminalAmount];
     routeTable = new std::stack<DirectedEdge>[V];
     edgeQueue = new std::queue<Packet *>[adj.size()];
 
+    std::uniform_int_distribution<int> distribution(1,20);
     for (int i = 0; i < terminalAmount; i++)
     {
-        terminals[i].page = new Page(i, 20); //TODO ADD RANDOM PAGE SIZE
+        terminals[i].page = new Page(i, distribution(*generator));
+        std::cout << terminals[i].page->size << "<-page size    page id->"<< terminals[i].page->id << std::endl;
     }
 }
 
@@ -78,12 +77,15 @@ void Router::recievePage(Page *page, int destination[])
 {
     int senderIp[2] = {ip, page->id};
 
+    std::cout << "DEVIDING INTO PACKETS PAGE SIZE " << page->size <<std::endl;
     double totalPackets = (page->size / PACKET_SIZE) + 1;
+    std::cout << "  PACKET AMOUNT " << totalPackets <<std::endl;
 
-    for (int i = 1; i < totalPackets; i++)
+    for (int i = 0; i < totalPackets; i++)
     {
         Packet *packet = new Packet(senderIp, destination, i, totalPackets, page->id, page->size);
         buffer.push(packet);
+        std::cout << "  buffer size " << buffer.size() <<std::endl;
     }
 }
 
@@ -95,11 +97,12 @@ void Router::recivePacket()
 
         if (packet->recieverIp[0] == this->ip)
         {
-            std::cout <<"-------------------------------"<< packet->recieverIp[0]<<this->ip<<std::endl;
+            std::cout <<"storing-------------------------------"<< packet->recieverIp[0]<<this->ip<<std::endl;
             storePacket(packet);
         }
         else
         {
+            std::cout <<"redirecting-------------------------------"<< packet->recieverIp[0]<<this->ip<<std::endl;
             redirectPacket(packet);
         }
 
