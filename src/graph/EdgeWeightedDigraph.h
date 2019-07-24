@@ -14,10 +14,10 @@ private:
     int V;
     int E;
 
-    Router* nodes;
-
     void validateVertex(int v);
 public:
+    Router* nodes;
+    
     EdgeWeightedDigraph(std::istream& ist);
     EdgeWeightedDigraph(int V);
     ~EdgeWeightedDigraph();
@@ -27,7 +27,6 @@ public:
     std::list<DirectedEdge> adjList(int v);
     std::string toString();
 
-    
 };
 
 EdgeWeightedDigraph::EdgeWeightedDigraph(int V) : V(V)
