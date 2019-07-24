@@ -1,41 +1,36 @@
 #include <iostream>
 #include <fstream>
-#include "./graph/DirectedEdge.h"
-#include "./graph/EdgeWeightedDigraph.h"
-#include "./graph/Dijkstra.h"
+
+#include "Admin.h"
 #include <stack>
 
 using namespace std;
 
 int main()
 {
-    ifstream ifs("tinyEWD.txt");
-    EdgeWeightedDigraph graph(ifs);
-    ifs.close();
-    cout << graph.toString() << endl;
 
-    cout << "DijkstraSP:" << endl;
-    int s = 3;
-    Dijkstra sp(graph, s);
-    for (int t = 0; t < graph.getV(); t++)
+    Admin *admin = new Admin("tinyEWD.txt");
+    cout << admin->G->toString() << endl;
+
+    cout << "Testing cycle" << endl;
+
+    admin->cycle();
+
+    for (size_t i = 0; i < 10; i++)
     {
-        if (sp.hasPathTo(t))
+        if (i%2 == 0)
         {
-            stack<DirectedEdge> s1 = sp.pathTo(t);
-            cout << s << " to " << t << " ("<< sp.distTo(t) <<") : ";
-            string path = "";
-            while (!s1.empty())
-            {
-                path.append(s1.top().toString());
-                path.append("  ");
-                s1.pop();
-            }
-            cout << path << endl;
+            admin->updateRouteTable();
         }
-        else
+        
+        admin->cycleNoPage();
+
+        for (int i = 0; i < admin->G->getV(); i++)
         {
-            cout << 0 << "has no path to " << t << endl;
+            cout << admin->G->nodes[i].toString() << endl;
         }
+        
+        cout << admin->G->toString() << endl;
     }
     return 0;
 }
