@@ -4,9 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <stdio.h>  /* printf, scanf, puts, NULL */
-#include <stdlib.h> /* srand, rand */
-#include <time.h>
+#include <random>
 
 #include "./internet/Router.h"
 #include "./graph/EdgeWeightedDigraph.h"
@@ -21,7 +19,7 @@ private:
     int E;
     int terminalAmount;
 
-    int random;
+    std::default_random_engine generator;
 
     void loadFile(std::string dir);
     void turnOnRouters();
@@ -38,7 +36,6 @@ Admin::Admin(std::string dir)
 {
     loadFile(dir);
     turnOnRouters();
-    srand(time(NULL));
 }
 
 void Admin::loadFile(std::string dir)
@@ -123,6 +120,10 @@ void Admin::turnOnRouters()
 void Admin::cycle()
 {
     //SEND PAGE
+    std::uniform_int_distribution<int> randomRouter(0,V);
+    std::uniform_int_distribution<int> randomTerminal(0,terminalAmount);
+    std::uniform_int_distribution<int> probability(0,100);
+
     for (int i = 0; i < 5; i++)
     {
         int destination[2] = {6, 0};
