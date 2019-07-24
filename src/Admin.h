@@ -20,9 +20,17 @@ private:
     int terminalAmount;
 
     std::default_random_engine generator;
+    std::uniform_int_distribution<> dis;
+
+    std::uniform_int_distribution<int> randomRouter;
+    std::uniform_int_distribution<int> randomTerminal;
+    std::uniform_int_distribution<int> probability;
 
     void loadFile(std::string dir);
     void turnOnRouters();
+    void setRandomRouter(int a, int b) { randomRouter = std::uniform_int_distribution<int>(a, b); };
+    void setRandomTerminal(int a, int b) { randomTerminal = std::uniform_int_distribution<int>(a, b); };
+    void setProbability(int a, int b) { probability = std::uniform_int_distribution<int>(a, b); };
 
 public:
     EdgeWeightedDigraph *G;
@@ -35,6 +43,9 @@ Admin::Admin(std::string dir)
 {
     loadFile(dir);
     turnOnRouters();
+    setRandomRouter(0, V - 1);
+    setRandomTerminal(0, terminalAmount - 1);
+    setProbability(0, 100);
 }
 
 void Admin::loadFile(std::string dir)
@@ -119,13 +130,9 @@ void Admin::turnOnRouters()
 void Admin::cycle()
 {
     //SEND PAGE if probability > 60.
-    std::uniform_int_distribution<int> randomRouter(0, V - 1);
-    std::uniform_int_distribution<int> randomTerminal(0, terminalAmount - 1);
-    std::uniform_int_distribution<int> probability(0, 100);
-
     if (probability(generator) > 60)
     {
-        
+
         int origin[2] = {randomRouter(generator), randomTerminal(generator)};
         int destination[2] = {randomRouter(generator), randomTerminal(generator)};
 
@@ -133,8 +140,7 @@ void Admin::cycle()
         {
             Page *page = G->nodes[origin[0]].terminals[origin[1]].page;
             G->nodes[origin[0]].recievePage(page, destination);
-            std::cout << "PROBABILITY OF SENDING PAGE OVER 60%...SENDING PAGE FROM-->TO:  " << 
-            origin[0]<<"."<<origin[1]<<"-->"<<destination[0]<<"."<<destination[1]<<std::endl;
+            std::cout << "PROBABILITY OF SENDING PAGE OVER 60%...SENDING PAGE FROM-->TO:  " << origin[0] << "." << origin[1] << "-->" << destination[0] << "." << destination[1] << std::endl;
         }
     }
 
@@ -158,7 +164,6 @@ void Admin::cycle()
     {
         G->nodes[i].recivePacket();
     }
-
 }
 
 #endif
