@@ -1,3 +1,5 @@
 https://web.stanford.edu/class/msande91si/www-spr04/readings/week1/InternetWhitepaper.htm
 
 http://www.linfo.org/packet.html
+
+https://stackoverflow.com/questions/7560114/random-number-c-in-some-range
