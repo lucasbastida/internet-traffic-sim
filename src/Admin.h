@@ -17,8 +17,9 @@ class Admin
 private:
     int V;
     int E;
-    int terminalAmount;
+    int pageCreationPercentage = 50;
 
+    std::random_device mch;
     std::default_random_engine generator;
     std::uniform_int_distribution<> dis;
 
@@ -31,10 +32,13 @@ private:
     void setRandomRouter(int a, int b) { randomRouter = std::uniform_int_distribution<int>(a, b); };
     void setRandomTerminal(int a, int b) { randomTerminal = std::uniform_int_distribution<int>(a, b); };
     void setProbability(int a, int b) { probability = std::uniform_int_distribution<int>(a, b); };
+    void setGenerator(std::random_device &mch) { generator = std::default_random_engine(mch()); }
 
 public:
+    int terminalAmount;
     EdgeWeightedDigraph *G;
     Admin(std::string dir);
+    ~Admin();
     void updateRouteTable();
     void cycle();
 };
@@ -42,6 +46,7 @@ public:
 Admin::Admin(std::string dir)
 {
     loadFile(dir);
+    setGenerator(mch);
     turnOnRouters();
     setRandomRouter(0, V - 1);
     setRandomTerminal(0, terminalAmount - 1);
@@ -58,6 +63,7 @@ void Admin::loadFile(std::string dir)
     if (V < 0)
         throw std::invalid_argument("|V| in a Digraph must be nonnegative");
 
+    std::cout << "-------------------------------SETTING GRAPH-------------------------------" << std::endl;
     G = new EdgeWeightedDigraph(V);
 
     for (int i = 0; i < E; i++)
@@ -67,15 +73,18 @@ void Admin::loadFile(std::string dir)
         ist >> v;
         ist >> w;
         ist >> weight;
-        DirectedEdge *edge = new DirectedEdge(v, w, weight);
+        DirectedEdge edge(v, w, weight);
         G->addEdge(edge);
     }
+    std::cout << "GRAPH:" << std::endl;
+    std::cout << G->toString() << std::endl;
+    std::cout << "-------------------------------FINISHED SETTING GRAPH-------------------------------" << std::endl;
     ist.close();
 }
 
 void Admin::updateRouteTable()
 {
-
+    std::cout << "-------------------------------UPDATING ROUTERS ROUTE TABLE-------------------------------" << std::endl;
     for (int v = 0; v < V; v++)
     {
         G->nodes[v].updateEdgeWeights();
@@ -119,7 +128,7 @@ void Admin::updateRouteTable()
 
 void Admin::turnOnRouters()
 {
-
+    std::cout << "-------------------------------SETTING ROUTERS-------------------------------" << std::endl;
     for (int i = 0; i < V; i++)
     {
         G->nodes[i].initialize(terminalAmount, G->nodes[i].adj.front().from(), V, &generator);
@@ -129,8 +138,9 @@ void Admin::turnOnRouters()
 
 void Admin::cycle()
 {
-    //SEND PAGE if probability > 60.
-    if (probability(generator) > 60)
+
+    //SEND PAGE if probability > .
+    if (probability(generator) > 100 - pageCreationPercentage)
     {
 
         int origin[2] = {randomRouter(generator), randomTerminal(generator)};
@@ -138,24 +148,29 @@ void Admin::cycle()
 
         if (origin[0] != destination[0])
         {
-            Page *page = G->nodes[origin[0]].terminals[origin[1]].page;
-            G->nodes[origin[0]].recievePage(page, destination);
-            std::cout << "PROBABILITY OF SENDING PAGE OVER 60%...SENDING PAGE FROM-->TO:  " << origin[0] << "." << origin[1] << "-->" << destination[0] << "." << destination[1] << std::endl;
+            std::cout << "PROBABILITY OF SENDING PAGE OVER " << 100 - pageCreationPercentage << "%...SENDING PAGE (FROM->TO):  " << origin[0] << "." << origin[1] << "->" << destination[0] << "." << destination[1] << std::endl;
+            
+            G->nodes[origin[0]].recievePage(origin[1], destination);
         }
     }
 
     //SEND ALL PACKETS IN EDGE QUEUE
     for (int i = 0; i < V; i++)
     {
-        for (int j = 0; j < G->nodes[i].adj.size(); j++)
+        int bufferIndex = 0;
+        for (std::list<DirectedEdge>::iterator it = G->nodes[i].adj.begin(); it != G->nodes[i].adj.end(); ++it)
         {
-            while (!G->nodes[i].edgeQueue[j].empty())
+            int destination = it->to();
+            for (int j = 0; j < it->maxPackets; j++)
             {
-                int destination = G->nodes[i].edgeQueue[j].front()->recieverIp[0];
-                Packet *packet = G->nodes[i].edgeQueue[j].front();
-                G->nodes[destination].buffer.push(packet);
-                G->nodes[i].edgeQueue[j].pop();
+                if (!G->nodes[i].edgeQueue[bufferIndex].empty())
+                {
+                    Packet packet = G->nodes[i].edgeQueue[bufferIndex].front();
+                    G->nodes[destination].buffer.push(packet);
+                    G->nodes[i].edgeQueue[bufferIndex].pop();
+                }
             }
+            bufferIndex++;
         }
     }
 
@@ -164,6 +179,11 @@ void Admin::cycle()
     {
         G->nodes[i].recivePacket();
     }
+}
+
+Admin::~Admin()
+{
+    delete G;
 }
 
 #endif
