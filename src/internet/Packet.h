@@ -8,14 +8,13 @@ public:
     int recieverIp[2];
     int packetId;
     int totalPackets;
-    int pageId;
     int pageSize;
 
-    Packet(int senderIp[], int recieverIp[], int packetId, int totalPackets, int pageId, int pageSize);
+    Packet(int senderIp[], int recieverIp[], int packetId, int totalPackets, int pageSize);
 };
 
-Packet::Packet(int senderIp[], int recieverIp[], int packetId, int totalPackets, int pageId, int pageSize)
-    : packetId(packetId), totalPackets(totalPackets), pageId(pageId), pageSize(pageSize)
+Packet::Packet(int senderIp[], int recieverIp[], int packetId, int totalPackets, int pageSize)
+    : packetId(packetId), totalPackets(totalPackets), pageSize(pageSize)
 {
     for (int i = 0; i < 2; i++)
     {
