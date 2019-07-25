@@ -4,9 +4,9 @@
 class Page
 {
 public:
-    int id;
     int size;
 
-    Page(int id, int size) :id(id), size(size){};
+    Page(int size) : size(size){};
+    std::string toString() { return "page size:" + std::to_string(size); }
 };
 #endif
