@@ -17,14 +17,19 @@ using namespace std::chrono;      // nanoseconds, system_clock, seconds
 int main()
 {
 
+    cout << "-------------------------------LOADING-------------------------------" << std::endl;
     Admin *admin = new Admin("tinyEWD.txt");
-    cout << admin->G->toString() << endl;
 
-    cout << "Testing cycle" << endl;
+    cout << endl;
+    cout << "STARING CYCLES:" << endl;
+    cout << endl;
 
-    for (size_t i = 0; i < 10; i++)
+    for (int loop = 0; loop < 10; loop++)
     {
-        if (i % 2 == 0)
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@CYCLE " << loop << " START@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        if (loop % 2 == 0 && loop != 0)
         {
             admin->updateRouteTable();
         }
@@ -34,10 +39,21 @@ int main()
         for (int i = 0; i < admin->G->getV(); i++)
         {
             cout << admin->G->nodes[i].toString() << endl;
+            for (int j = 0; j < admin->terminalAmount; j++)
+            {
+                cout << admin->G->nodes[i].terminals[j].toString() << endl;
+            }
         }
 
-        cout << admin->G->toString() << endl;
         // sleep_for(seconds(3));
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CYCLE " << loop << " END@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+        cout << endl
+             << endl
+             << endl;
     }
+
+    delete admin;
     return 0;
 }
