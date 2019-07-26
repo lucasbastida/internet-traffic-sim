@@ -56,24 +56,30 @@ Admin::Admin(std::string dir)
 void Admin::loadFile(std::string dir)
 {
     std::ifstream ist("tinyEWD.txt");
-
+    std::cout << "-------------------------------SETTING GRAPH-------------------------------" << std::endl;
     ist >> V;
     ist >> E;
     ist >> terminalAmount;
-    if (V < 0)
-        throw std::invalid_argument("|V| in a Digraph must be nonnegative");
 
-    std::cout << "-------------------------------SETTING GRAPH-------------------------------" << std::endl;
+    if (V < 1 || V > 256)
+        throw std::invalid_argument("Invalid |V| value: " + std::to_string(V) + " Must be within [1,256]");
+    if (terminalAmount < 1 || terminalAmount > 256)
+        throw std::invalid_argument("Invalid terminalAmount value: " + std::to_string(terminalAmount) + " Must be within [1,256]");
+        
     G = new EdgeWeightedDigraph(V);
 
     for (int i = 0; i < E; i++)
     {
         int v, w;
-        double weight;
+        int weight;
         ist >> v;
         ist >> w;
         ist >> weight;
-        DirectedEdge edge(v, w, weight);
+        if (v < 0 || v > 255)
+            throw std::invalid_argument("Invalid Edge v value: " + std::to_string(v));
+        if (w < 0 || w > 255)
+            throw std::invalid_argument("Invalid Edge w value: " + std::to_string(v));
+        DirectedEdge edge(v, w, weight, &(G->nodes[v]), &(G->nodes[w]));
         G->addEdge(edge);
     }
     std::cout << "GRAPH:" << std::endl;
@@ -101,6 +107,10 @@ void Admin::updateRouteTable()
             {
                 routeTable[t] = sp.pathTo(t);
             }
+            else
+            {
+                routeTable[t] = std::stack<DirectedEdge>();
+            }
         }
         for (int t = 0; t < G->getV(); t++)
         {
@@ -119,26 +129,27 @@ void Admin::updateRouteTable()
             }
             else
             {
-                std::cout << 0 << "has no path to " << t << std::endl;
+                std::cout << i << "has no path to " << t << std::endl;
             }
         }
         G->nodes[i].updateRouteTable(routeTable);
     }
+    std::cout << "-------------------------FINISHED UPDATING ROUTERS ROUTE TABLE----------------------" << std::endl;
 }
 
 void Admin::turnOnRouters()
 {
-    std::cout << "-------------------------------SETTING ROUTERS-------------------------------" << std::endl;
+    std::cout << "-------------------------------TURNING ON ROUTERS-------------------------------" << std::endl;
     for (int i = 0; i < V; i++)
     {
         G->nodes[i].initialize(terminalAmount, G->nodes[i].adj.front().from(), V, &generator);
     }
     updateRouteTable();
+    std::cout << "---------------------------FINISHED TURNING ON ROUTERS-------------------------------" << std::endl;
 }
 
 void Admin::cycle()
 {
-
     //SEND PAGE if probability > .
     if (probability(generator) > 100 - pageCreationPercentage)
     {
@@ -148,36 +159,23 @@ void Admin::cycle()
 
         if (origin[0] != destination[0])
         {
-            std::cout << "PROBABILITY OF SENDING PAGE OVER " << 100 - pageCreationPercentage << "%...SENDING PAGE (FROM->TO):  " << origin[0] << "." << origin[1] << "->" << destination[0] << "." << destination[1] << std::endl;
-            
-            G->nodes[origin[0]].recievePage(origin[1], destination);
+            std::cout << "PROBABILITY OF SENDING PAGE OVER " << 100 - pageCreationPercentage
+                      << "%...SENDING PAGE (FROM->TO):  "
+                      << origin[0] << "." << origin[1] << "->" << destination[0] << "." << destination[1] << std::endl;
+            G->nodes[origin[0]].receivePage(origin[1], destination);
         }
     }
 
     //SEND ALL PACKETS IN EDGE QUEUE
     for (int i = 0; i < V; i++)
     {
-        int bufferIndex = 0;
-        for (std::list<DirectedEdge>::iterator it = G->nodes[i].adj.begin(); it != G->nodes[i].adj.end(); ++it)
-        {
-            int destination = it->to();
-            for (int j = 0; j < it->maxPackets; j++)
-            {
-                if (!G->nodes[i].edgeQueue[bufferIndex].empty())
-                {
-                    Packet packet = G->nodes[i].edgeQueue[bufferIndex].front();
-                    G->nodes[destination].buffer.push(packet);
-                    G->nodes[i].edgeQueue[bufferIndex].pop();
-                }
-            }
-            bufferIndex++;
-        }
+        G->nodes[i].sendPackets();
     }
 
     //WORK ON PACKETS IN BUFFER. STORE PACKET TO GENERATE WEBPAGE OR REDIRECT TO EDGE QUEUE.
     for (int i = 0; i < V; i++)
     {
-        G->nodes[i].recivePacket();
+        G->nodes[i].receivePackets();
     }
 }
 
