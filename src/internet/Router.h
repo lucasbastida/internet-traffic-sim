@@ -18,6 +18,7 @@ class Router
     int ip;
     int numberTerminals;
     int packetsStored = 0;
+    int V;
 
     std::stack<DirectedEdge> *routeTable;
 
@@ -48,7 +49,7 @@ public:
 void Router::initialize(int terminalAmount, int ip, int V, std::default_random_engine *generator)
 {
     std::cout << "INITIALIZING ROUTER: IP: " << ip << std::endl;
-
+    this->V = V;
     this->ip = ip;
     this->numberTerminals = terminalAmount;
 
@@ -77,6 +78,21 @@ void Router::updateRouteTable(std::stack<DirectedEdge> *routeTable)
         std::stack<DirectedEdge> temp;
         temp.push(*it);
         routeTable[it->to()] = temp;
+    }
+
+    for (int t = 0; t < V; t++)
+    {
+        std::cout << this->ip << " to " << t << " : ";
+        std::stack<DirectedEdge> s1 = routeTable[t];
+
+        std::string path = "";
+        while (!s1.empty())
+        {
+            path.append(s1.top().toString());
+            path.append("  ");
+            s1.pop();
+        }
+        std::cout << path << std::endl;
     }
 }
 
@@ -137,7 +153,7 @@ void Router::storePacket(Packet packet)
     {
         if (!it->empty())
         {
-            if (it->front().recieverIp[1] == packet.recieverIp[1])
+            if (it->front().senderIp[0] == packet.senderIp[0] && it->front().senderIp[1] == packet.senderIp[1])
             {
                 std::cout << "There is a page already being creating for corresponding packet. Adding packet." << std::endl;
                 it->push(packet);
