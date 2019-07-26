@@ -37,7 +37,7 @@ Dijkstra::Dijkstra(EdgeWeightedDigraph &G, int s)
     }
 
     arrayDistTo[s] = 0.0;
-    edgeTo[s] = DirectedEdge(s, s, 0.0);
+    edgeTo[s] = DirectedEdge(s, s, 0.0, NULL, NULL);
     pq->Insert(s, 0.0);
     while (!pq->IsEmpty())
     {
