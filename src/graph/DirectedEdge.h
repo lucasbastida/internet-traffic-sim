@@ -4,6 +4,8 @@
 #include <exception>
 #include <stdexcept>
 
+class Router;
+
 class DirectedEdge
 {
 private:
@@ -12,10 +14,13 @@ private:
     int weight;
 
 public:
-    int maxPackets;
     int bandwidth;
+    Router *orig;
+    Router *dest;
+    int maxPackets;
+
     DirectedEdge();
-    DirectedEdge(int v, int w, int bandwidth);
+    DirectedEdge(int v, int w, int bandwidth, Router *orig, Router *dest);
     ~DirectedEdge();
     int from() { return v; }
     int to() { return w; }
@@ -28,7 +33,8 @@ DirectedEdge::DirectedEdge() : v(0), w(0), weight(1)
 {
 }
 
-DirectedEdge::DirectedEdge(int v, int w, int bandwidth) : v(v), w(w), weight(1), bandwidth(bandwidth)
+DirectedEdge::DirectedEdge(int v, int w, int bandwidth, Router *orig, Router *dest)
+    : v(v), w(w), weight(1), bandwidth(bandwidth), orig(orig), dest(dest)
 {
     if (v < 0 || w < 0 || bandwidth < 0)
     {
