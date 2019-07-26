@@ -60,7 +60,7 @@ EdgeWeightedDigraph::EdgeWeightedDigraph(std::istream &ist) : V(0), E(0)
         ist >> v;
         ist >> w;
         ist >> weight;
-        DirectedEdge edge(v,w,weight);
+        DirectedEdge edge(v,w,weight, &nodes[v], &nodes[w]);
         addEdge(edge);
         E--;
     }
