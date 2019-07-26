@@ -39,8 +39,9 @@ public:
     void updateRouteTable(std::stack<DirectedEdge> *routeTable);
 
     void updateEdgeWeights();
-    void recievePage(int terminal, int destination[]);
-    void recivePacket();
+    void receivePage(int terminal, int destination[]);
+    void receivePackets();
+    void sendPackets();
     std::string toString();
 };
 
@@ -69,7 +70,7 @@ void Router::updateRouteTable(std::stack<DirectedEdge> *routeTable)
 {
     std::stack<DirectedEdge> *tempRouteTable = this->routeTable;
     this->routeTable = routeTable;
-    delete [] tempRouteTable;
+    delete[] tempRouteTable;
 
     for (std::list<DirectedEdge>::iterator it = adj.begin(); it != adj.end(); ++it)
     {
@@ -79,52 +80,57 @@ void Router::updateRouteTable(std::stack<DirectedEdge> *routeTable)
     }
 }
 
-void Router::recievePage(int terminal, int destination[])
+void Router::receivePage(int terminal, int destination[])
 {
     terminals[terminal].pagesSent++;
     Page *page = terminals[terminal].page;
     int senderIp[2] = {ip, terminal};
-    
 
-    std::cout << "DEVIDING INTO PACKETS: page size:" << page->size << std::endl;
-    double totalPackets = (page->size / PACKET_SIZE) + 1;
-    std::cout << "packet amount->" << totalPackets << std::endl;
+    int totalPackets = (page->size / PACKET_SIZE) + 1;
+
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
+    std::cout << "Recieved page at ip: (" << this->ip << "." << terminals[terminal].id << ") page size:" << page->size << std::endl;
+    std::cout << "Dividing into packets:" << std::endl;
+    std::cout << "packet amount:" << totalPackets << std::endl;
+    std::cout << "Adding packets into router buffer. current size:" << buffer.size() << std::endl;
 
     for (int i = 0; i < totalPackets; i++)
     {
         Packet packet(senderIp, destination, i, totalPackets, page->size);
-        // Packet *packet = new Packet(senderIp, destination, i, totalPackets, page->size);
         buffer.push(packet);
     }
-    std::cout << "router " << ip << " buffer size " << buffer.size() << std::endl;
+    std::cout << "Finished adding packets into buffer " << ip << " . new buffer size:" << buffer.size() << std::endl;
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
 }
 
-void Router::recivePacket()
+void Router::receivePackets()
 {
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
+    std::cout << "Packet reception from router: " << this->ip << std::endl;
+    std::cout << "router buffer size " << buffer.size() << std::endl;
     while (!buffer.empty())
     {
         Packet packet = buffer.front();
 
         if (packet.recieverIp[0] == this->ip)
         {
-            std::cout << "STORING packet (ip:" << ip << "->dest.ip:" << packet.recieverIp[0] << ")" << std::endl;
             storePacket(packet);
-            std::cout << "router buffer size " << buffer.size() << std::endl;
         }
         else
         {
-            std::cout << "REDIRECTING packet to edge queue (" << ip << "->" << packet.recieverIp[0] << ")" << std::endl;
             redirectPacket(packet);
-            std::cout << "router buffer size " << buffer.size() << std::endl;
         }
-
         buffer.pop();
-        std::cout << "router buffer size " << buffer.size() << std::endl;
+        std::cout << "new router buffer size " << buffer.size() << std::endl;
     }
+    std::cout << "Finished packet reception from router: " << this->ip << std::endl;
+    std::cout << "final router buffer size " << buffer.size() << std::endl;
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
 }
 
 void Router::storePacket(Packet packet)
 {
+    std::cout << "STORING packet: (" << ip << "->" << packet.recieverIp[0] << ") (ip->dest.ip)" << std::endl;
     bool stored = false;
     packetsStored++;
     for (std::list<std::queue<Packet>>::iterator it = newPage.begin(); it != newPage.end(); ++it)
@@ -133,6 +139,7 @@ void Router::storePacket(Packet packet)
         {
             if (it->front().recieverIp[1] == packet.recieverIp[1])
             {
+                std::cout << "There is a page already being creating for corresponding packet. Adding packet." << std::endl;
                 it->push(packet);
                 stored = true;
             }
@@ -141,6 +148,9 @@ void Router::storePacket(Packet packet)
 
     if (!stored)
     {
+        std::cout << "No page currently being created for corresponding packet" << std::endl;
+        std::cout << "Creating new page originating from (" << packet.senderIp[0] << "." << packet.senderIp[1] << ") at router ip:"
+                  << this->ip << std::endl;
         std::queue<Packet> temp;
         temp.push(packet);
         newPage.push_back(temp);
@@ -151,12 +161,14 @@ void Router::storePacket(Packet packet)
         int queueSize = it->size();
         if (queueSize == it->front().totalPackets)
         {
+            std::cout << "Page from: (" << packet.senderIp[0] << "." << packet.senderIp[1]
+                      << ") to: (" << packet.recieverIp[0] << "." << packet.recieverIp[1]
+                      << ") of size: " << it->front().pageSize << " was created!" << std::endl;
+            // std::cout << it->front().totalPackets*PACKET_SIZE <<std::endl;
             terminals[it->front().recieverIp[1]].pagesRecieved++;
             while (!it->empty())
             {
-                // Packet packetQueue = it->front();
                 it->pop();
-                // delete packetQueue;
             }
             newPage.erase(it++);
         }
@@ -165,17 +177,58 @@ void Router::storePacket(Packet packet)
 
 void Router::redirectPacket(Packet packet)
 {
+    std::cout << "REDIRECTING packet to edge queue (" << ip << "->" << packet.recieverIp[0] << ")" << std::endl;
     int index = 0;
+    if (adj.begin() == adj.end())
+    {
+        std::cout << "NO EDGES CONNECTING ROUTER, deleting packet id:" << packet.packetId << " from:" << packet.senderIp[0] << "." << packet.senderIp[1] << std::endl;
+    }
     for (std::list<DirectedEdge>::iterator it = adj.begin(); it != adj.end(); ++it)
     {
         //if the connected outgoing edge is the one corresponding to the path the packet needs to take, then add it to that edges queue
-        if (routeTable[packet.recieverIp[0]].top().to() == it->to())
+        if (!routeTable[packet.recieverIp[0]].empty())
         {
-            edgeQueue[index].push(packet);
-            std::cout << it->from() << "->" << it->to() << " new queue size: " << edgeQueue[index].size() << std::endl;
+            if (routeTable[packet.recieverIp[0]].top().to() == it->to())
+            {
+                edgeQueue[index].push(packet);
+                std::cout << "EdgeQueue ("
+                          << it->from() << "->" << it->to()
+                          << "). EdgeQueue size: " << edgeQueue[index].size() << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "UNREACHABLE DESTINATION FROM " << packet.senderIp[0] << "." << packet.senderIp[1] << " deleting packet..." << std::endl;
         }
         index++;
     }
+}
+
+void Router::sendPackets()
+{
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
+    int bufferIndex = 0;
+    std::cout << "Sending packets from Edge Queues at router ip:" << this->ip << std::endl;
+    for (std::list<DirectedEdge>::iterator it = adj.begin(); it != adj.end(); ++it)
+    {
+        // int destination = it->to();
+        std::cout << "Edge Queue (" << it->from() << "->" << it->to() << ") size:" << edgeQueue[bufferIndex].size()
+                  << " - Edge Bandwidth:" << it->bandwidth
+                  << std::endl;
+        for (int j = 0; j < it->maxPackets; j++)
+        {
+            if (!edgeQueue[bufferIndex].empty())
+            {
+                Packet packet = edgeQueue[bufferIndex].front();
+                std::cout << "sending packet #:" << j << " - packet id:" << packet.packetId << std::endl;
+                it->dest->buffer.push(packet);
+                edgeQueue[bufferIndex].pop();
+            }
+        }
+        bufferIndex++;
+    }
+    std::cout << "Finished sending packets from Edge Queues at router ip:" << this->ip << std::endl;
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
 }
 
 void Router::updateEdgeWeights()
@@ -195,10 +248,10 @@ std::string Router::toString()
     return info;
 }
 
-Router::~Router(){
-    delete [] routeTable;
+Router::~Router()
+{
+    delete[] routeTable;
     delete[] edgeQueue;
     delete[] terminals;
-    
 }
 #endif
