@@ -112,26 +112,6 @@ void Admin::updateRouteTable()
                 routeTable[t] = std::stack<DirectedEdge>();
             }
         }
-        for (int t = 0; t < G->getV(); t++)
-        {
-            if (sp.hasPathTo(t))
-            {
-                std::stack<DirectedEdge> s1 = sp.pathTo(t);
-                std::cout << i << " to " << t << " (" << sp.distTo(t) << ") : ";
-                std::string path = "";
-                while (!s1.empty())
-                {
-                    path.append(s1.top().toString());
-                    path.append("  ");
-                    s1.pop();
-                }
-                std::cout << path << std::endl;
-            }
-            else
-            {
-                std::cout << i << "has no path to " << t << std::endl;
-            }
-        }
         G->nodes[i].updateRouteTable(routeTable);
     }
     std::cout << "-------------------------FINISHED UPDATING ROUTERS ROUTE TABLE----------------------" << std::endl;
